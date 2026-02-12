@@ -2,6 +2,8 @@ const asyncHandler = require("../utlis/asyncHandler");
 const Admin = require("../models/admin.model");
 const { generateAccessToken, generateRefreshToken } = require("../utlis/generateTokens");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+
 
 
 
@@ -56,9 +58,14 @@ exports.loginAdmin = asyncHandler(async (req, res) => {
     // 4. Hash refresh token before saving (security)
     const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
 
-    admin.refreshToken = hashedRefreshToken;
-    await admin.save();
+    // admin.refreshToken = hashedRefreshToken;
+    // await admin.save();
 
+    await Admin.findByIdAndUpdate(
+    admin._id,
+    { refreshToken: hashedRefreshToken },
+    { new: true }
+);
     // 5. Send response
     res.json({
         accessToken,
@@ -75,29 +82,33 @@ exports.refreshToken = asyncHandler(async (req, res) => {
 
     const { refreshToken } = req.body;
 
-    // 1. token provided?
+
     if (!refreshToken) {
         res.status(401);
         throw new Error("Refresh token required");
     }
 
-    // 2. verify JWT signature
+
     let decoded;
     try {
+
+   
         decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
     } catch (err) {
+        console.error("Refresh token verification failed:", err);
         res.status(403);
         throw new Error("Invalid or expired refresh token");
     }
 
-    // 3. find admin
+
+    console.log("Decoded refresh token:", decoded);
     const admin = await Admin.findById(decoded.id);
     if (!admin || !admin.refreshToken) {
         res.status(403);
         throw new Error("Access denied");
     }
 
-    // 4. compare hashed token stored in DB
+
     const isMatch = await bcrypt.compare(refreshToken, admin.refreshToken);
 
     if (!isMatch) {
@@ -105,10 +116,9 @@ exports.refreshToken = asyncHandler(async (req, res) => {
         throw new Error("Refresh token mismatch");
     }
 
-    // 5. generate NEW access token
+
     const newAccessToken = generateAccessToken(admin);
 
-    // 6. send new access token
     res.json({
         accessToken: newAccessToken
     });

@@ -9,6 +9,7 @@ const generateAccessToken = (admin) => {
 };
 
 const generateRefreshToken = (admin) => {
+   
     return jwt.sign(
         { id: admin._id },
         process.env.REFRESH_TOKEN_SECRET,
