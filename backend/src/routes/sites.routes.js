@@ -11,8 +11,10 @@ router.get("/", (req, res) => {
 
 router.post("/createSite", verifyToken, siteController.createSite);
 router.get("/getAllSites", verifyToken, siteController.getSites);
+router.get("/timezones", verifyToken, siteController.getTimezones);
 router.get("/:id", verifyToken, siteController.getSiteById);
 router.put("/:id", verifyToken, siteController.updateSite);
 router.delete("/:id", verifyToken, siteController.deleteSite);
+
 
 module.exports = router;

@@ -1,6 +1,8 @@
 const Site = require("../models/sites.model");
 const User = require("../models/users.model");
 const asyncHandler = require("../utlis/asyncHandler");
+const axios = require("axios");
+
 
 
 // CREATE SITE
@@ -92,4 +94,11 @@ exports.deleteSite = asyncHandler(async (req, res) => {
     }
 
     res.json({ message: "Site deleted successfully" });
+});
+
+exports.getTimezones = asyncHandler(async (req, res) => {
+
+    const response = await axios.get("https://worldtimeapi.org/api/timezone");
+
+    res.json(response.data);
 });
