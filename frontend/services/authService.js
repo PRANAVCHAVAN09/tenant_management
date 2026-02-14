@@ -1,10 +1,12 @@
 import API from "../api/axios";
 
 export const loginAdmin = async (data) => {
-  const res = await API.post("/auth/login", data);
+  const res = await API.post("/auth/login", data, {
+    withCredentials: true
+  });
   return res.data;
 };
 
 export const logoutUser = async () => {
-  await API.post("/auth/logout");
+  return API.post("/auth/logout", {}, { withCredentials: true });
 };

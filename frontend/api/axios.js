@@ -30,8 +30,8 @@ API.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        await axios.post(
-          "http://localhost:5000/api/auth/refresh",
+        await axios.post(`
+          ${VITE_API_URL}/refresh`,
           {},
           { withCredentials: true }
         );
