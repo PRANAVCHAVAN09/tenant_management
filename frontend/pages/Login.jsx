@@ -17,14 +17,15 @@ const Login = () => {
     setError("");
 
     try {
-     await loginAdmin({ email, password });
-     await login();
+      const res = await loginAdmin({ email, password });
+ 
+  
+      await login(res?.accessToken, res?.refreshToken);
 
-debugger
+ 
       navigate("/dashboard");
 
     } catch (err) {
-      console.log(err,"299999")
       setError(err.response?.data?.message || "Login failed");
     }
   };

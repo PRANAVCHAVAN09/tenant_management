@@ -18,11 +18,8 @@ router.post("/login", authController.loginAdmin);
 //refresh token
 router.post("/refresh", authController.refreshToken); 
 
-//
-router.get("/check", verifyToken, authController.checkAuth);
-
 //LogOut
-router.post("/logout", authController.logout); 
+router.post("/logout",verifyToken, authController.logout); 
 
 
 

@@ -1,57 +1,38 @@
-import { createContext, useState, useEffect } from "react";
-import { logoutUser } from "../services/authService";
-import API from "../api/axios";
+import { createContext, useState } from "react";
+
+import { logoutUser } from "../services/authService"; 
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
+  const [isAuthenticated, setIsAuthenticated] = useState(
+    !!localStorage.getItem("accessToken")
+  );
 
-  const [isAuthenticated, setIsAuthenticated] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  const checkSession = async () => {
-    try {
-      await API.get("/auth/check");
-      setIsAuthenticated(true);
-
-    } catch (err) {
-
-
-      if (err.response?.status === 401) {
-        setIsAuthenticated(false);
-      } else {
-        console.error("Auth check network/server error:", err.message);
-      }
-
-    } finally {
-      setLoading(false);
-    }
+  const login = (token,refreshToken,id) => {
+    localStorage.setItem("accessToken", token);
+    localStorage.setItem("refreshToken", refreshToken);
+    setIsAuthenticated(true);
   };
 
-  useEffect(() => {
-    checkSession();
-  }, []);
+  const logout = async() => {
+  try {
+    await logoutUser(); // backend removes refresh token
+  } catch (err) {
+    console.log(err);
+  }
 
-  const login = async() => {
-      await checkSession();
-    // setIsAuthenticated(true);
-  };
+  // clear client storage
+  localStorage.removeItem("accessToken");
+  localStorage.removeItem("refreshToken");
 
-  const logout = async () => {
-    try {
-      await logoutUser();
-    } catch (err) {
-      console.log(err);
-    }
+  setIsAuthenticated(false);
+
     setIsAuthenticated(false);
   };
 
-
-  if (loading) return null;
-
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, logout, checkSession }}>
-
+    <AuthContext.Provider value={{ isAuthenticated, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
