@@ -1,7 +1,12 @@
 import API from "../api/axios";
 
-export const getSites = async () => {
-  const res = await API.get("/sites/getAllSites");
+export const getPaginatedSites = async (page) => {
+  const res = await API.get(`/sites/paginatedSites?page=${page}`);
+  return res.data;
+};
+
+export const getSites = async (page) => {
+  const res = await API.get(`/sites/getAllSites`);
   return res.data;
 };
 

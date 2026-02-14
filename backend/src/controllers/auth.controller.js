@@ -5,6 +5,16 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
 
+const isProduction = process.env.NODE_ENV === "production";
+
+const cookieOptions = {
+  httpOnly: true,
+  secure: isProduction,                 // HTTPS only in production
+  sameSite: isProduction ? "none" : "lax", // CRITICAL for Vercel ↔ Render
+  path: "/"
+};
+
+
 
 
 
@@ -18,7 +28,8 @@ exports.registerAdmin = asyncHandler(async (req, res) => {
     // check existing admin
     const existing = await Admin.findOne({ email });
 
-    if (existing) {``
+    if (existing) {
+        ``
         res.status(400);
         throw new Error("Admin already exists");
     }
@@ -56,31 +67,40 @@ exports.loginAdmin = asyncHandler(async (req, res) => {
     const refreshToken = generateRefreshToken(admin);
 
     // 4. Hash refresh token before saving (security)
+
+    console.log(accessToken,"611" , refreshToken,"622")
     const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
 
     // admin.refreshToken = hashedRefreshToken;
     // await admin.save();
 
     await Admin.findByIdAndUpdate(
-    admin._id,
-    { refreshToken: hashedRefreshToken },
-    { new: true }
-);
+        admin._id,
+        { refreshToken: hashedRefreshToken },
+        { new: true }
+    );
     // 5. Send response
-    res.json({
-        accessToken,
-        refreshToken,
+    res
+        .cookie("accessToken", accessToken, {
+             ...cookieOptions,
+            maxAge: 15 * 60 * 1000
+        })
+        .cookie("refreshToken", refreshToken, {
+              ...cookieOptions,
+            maxAge: 7 * 24 * 60 * 60 * 1000
+        })
+        .json({
+
         admin: {
             id: admin._id,
             name: admin.name,
             email: admin.email
-        }
-    });
+        }});
 });
 
 exports.refreshToken = asyncHandler(async (req, res) => {
 
-    const { refreshToken } = req.body;
+    const refreshToken = req.cookies.refreshToken;
 
 
     if (!refreshToken) {
@@ -92,7 +112,7 @@ exports.refreshToken = asyncHandler(async (req, res) => {
     let decoded;
     try {
 
-   
+
         decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
     } catch (err) {
         console.error("Refresh token verification failed:", err);
@@ -119,7 +139,25 @@ exports.refreshToken = asyncHandler(async (req, res) => {
 
     const newAccessToken = generateAccessToken(admin);
 
-    res.json({
-        accessToken: newAccessToken
-    });
+ res
+  .cookie("accessToken", newAccessToken, {
+       ...cookieOptions,
+      maxAge: 7 * 24 * 60 * 60 * 1000
+  })
+  .status(200)
+  .json({ message: "Access token refreshed" });
 });
+
+exports.checkAuth = (req, res) => {
+  res.status(200).json({
+    authenticated: true
+  });
+};
+
+
+exports.logout = (req, res) => {
+res.clearCookie("accessToken", cookieOptions);
+res.clearCookie("refreshToken", cookieOptions);
+
+  res.json({ message: "Logged out" });
+};

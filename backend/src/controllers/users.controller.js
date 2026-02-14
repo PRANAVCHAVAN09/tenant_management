@@ -123,8 +123,13 @@ exports.deactivateUser = asyncHandler(async (req, res) => {
         throw new Error("User not found");
     }
 
-    user.status = "inactive";
+    // toggle status
+    user.status = user.status === "active" ? "inactive" : "active";
+
     await user.save();
 
-    res.json({ message: "User deactivated successfully" });
+    res.json({
+        message: `User ${user.status === "active" ? "activated" : "deactivated"} successfully`,
+        user
+    });
 });

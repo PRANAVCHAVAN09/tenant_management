@@ -56,11 +56,17 @@ const Users = () => {
   };
 
   // Deactivate
-  const handleDeactivate = async (id) => {
+ const handleDeactivate = async (id) => {
+  try {
     await deactivateUser(id);
-    loadUsers();
-  };
 
+    // refresh list
+    loadUsers();
+
+  } catch (err) {
+    alert(err.response?.data?.message);
+  }
+};
   return (
     <div>
 
@@ -155,14 +161,23 @@ const Users = () => {
                   </span>
                 </td>
                 <td>
-                  {user.status === "active" && (
+                  {/* {user.status === "active" && (
                     <button
                       onClick={() => handleDeactivate(user._id)}
                       className="text-red-500"
                     >
                       Deactivate
                     </button>
-                  )}
+                  )} */}
+                  <button
+                    onClick={() => handleDeactivate(user._id)}
+                    className={`px-3 py-1 rounded text-white ${user.status === "active"
+                        ? "bg-red-500 hover:bg-red-600"
+                        : "bg-green-500 hover:bg-green-600"
+                      }`}
+                  >
+                    {user.status === "active" ? "Deactivate" : "Activate"}
+                  </button>
                 </td>
 
               </tr>

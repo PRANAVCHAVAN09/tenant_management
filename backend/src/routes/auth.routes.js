@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const authController = require("../controllers/auth.controller");
+const verifyToken = require("../middleware/auth.middleware");
+
 
 
 router.get("/", (req, res) => {
@@ -15,6 +17,13 @@ router.post("/login", authController.loginAdmin);
 
 //refresh token
 router.post("/refresh", authController.refreshToken); 
+
+//
+router.get("/check", verifyToken, authController.checkAuth);
+
+//LogOut
+router.post("/logout", authController.logout); 
+
 
 
 

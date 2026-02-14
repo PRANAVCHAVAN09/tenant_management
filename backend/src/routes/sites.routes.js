@@ -10,7 +10,9 @@ router.get("/", (req, res) => {
 
 
 router.post("/createSite", verifyToken, siteController.createSite);
+router.get("/paginatedSites", verifyToken, siteController.getSites);
 router.get("/getAllSites", verifyToken, siteController.getSites);
+
 router.get("/timezones", verifyToken, siteController.getTimezones);
 router.get("/:id", verifyToken, siteController.getSiteById);
 router.put("/:id", verifyToken, siteController.updateSite);
