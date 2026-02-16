@@ -1,6 +1,7 @@
 const Role = require("../models/roles.model");
-const User = require("../models/users.model"); // needed to block deletion
+const User = require("../models/users.model"); 
 const asyncHandler = require("../utlis/asyncHandler");
+const PERMISSIONS = require("../config/permission");
 
 
 // CREATE ROLE
@@ -33,6 +34,7 @@ exports.getRoles = asyncHandler(async (req, res) => {
 
 // UPDATE ROLE
 exports.updateRole = asyncHandler(async (req, res) => {
+
     const role = await Role.findById(req.params.id);
 
     if (!role) {
@@ -40,14 +42,39 @@ exports.updateRole = asyncHandler(async (req, res) => {
         throw new Error("Role not found");
     }
 
+
+    const previousStatus = role.status;
+
+
     role.name = req.body.name || role.name;
     role.permissions = req.body.permissions || role.permissions;
     role.status = req.body.status || role.status;
 
     await role.save();
 
+
+
+    if (previousStatus === "active" && role.status === "inactive") {
+
+        await User.updateMany(
+            { role: role._id },
+            { $set: { status: "inactive" } }
+        );
+    }
+
+
+    if (previousStatus === "inactive" && role.status === "active") {
+
+        await User.updateMany(
+            { role: role._id },
+            { $set: { status: "active" } }
+        );
+
+    }
+
     res.json(role);
 });
+
 
 
 // DELETE ROLE (IMPORTANT LOGIC)
@@ -70,3 +97,8 @@ exports.deleteRole = asyncHandler(async (req, res) => {
 
     res.json({ message: "Role deleted successfully" });
 });
+
+
+exports.getPermissions = (req, res) => {
+  res.json(PERMISSIONS);
+};

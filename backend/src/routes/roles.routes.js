@@ -11,5 +11,7 @@ router.post("/createRole", verifyToken, roleController.createRole);
 router.get("/getRoles", verifyToken, roleController.getRoles);
 router.put("/:id", verifyToken, roleController.updateRole);
 router.delete("/:id", verifyToken, roleController.deleteRole);
+router.get("/permissions", verifyToken, roleController.getPermissions);
+
 
 module.exports = router;
