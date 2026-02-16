@@ -177,8 +177,3 @@ Token auto refresh system
 Pranav Chavan
 MERN Stack Developer
 
-📧 Submission
-
-Shared with:
-project.coordinator@adalovelacetechnologies.com
-hr@adalovelacetechnologies.com
