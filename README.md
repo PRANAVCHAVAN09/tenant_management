@@ -120,19 +120,6 @@ tenant_management/
 │   ├── api/
 │   └── components/
 
-Backend (.env)
-MONOGO_URI=mongodb+srv://pranav_db:pranav789@cluster0.5gicprp.mongodb.net/tenantManagement?retryWrites=true&w=majority
-PORT=5000
-ACCESS_TOKEN_SECRET=access_secret_key
-REFRESH_TOKEN_SECRET=refresh_secret_key
-ACCESS_TOKEN_EXPIRE=15m
-REFRESH_TOKEN_EXPIRE=7d
-NODE_ENV=production
-CLIENT_URL=https://tenant-management-liart.vercel.app/
-
-Frontend (.env)
-VITE_API_URL=https://tenant-management-jsps.onrender.com/api
-
 🛠️ Local Setup Instructions
 1️⃣ Clone Repository
 git clone <your-repo-url>
