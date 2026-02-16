@@ -121,12 +121,14 @@ tenant_management/
 │   └── components/
 
 Backend (.env)
+MONOGO_URI=mongodb+srv://pranav_db:pranav789@cluster0.5gicprp.mongodb.net/tenantManagement?retryWrites=true&w=majority
 PORT=5000
-MONGO_URI=your_mongodb_connection
-ACCESS_TOKEN_SECRET=your_access_secret
-REFRESH_TOKEN_SECRET=your_refresh_secret
-CLIENT_URL=https://tenant-management-liart.vercel.app
+ACCESS_TOKEN_SECRET=access_secret_key
+REFRESH_TOKEN_SECRET=refresh_secret_key
+ACCESS_TOKEN_EXPIRE=15m
+REFRESH_TOKEN_EXPIRE=7d
 NODE_ENV=production
+CLIENT_URL=https://tenant-management-liart.vercel.app/
 
 Frontend (.env)
 VITE_API_URL=https://tenant-management-jsps.onrender.com/api
