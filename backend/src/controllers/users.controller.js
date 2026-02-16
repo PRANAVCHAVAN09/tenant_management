@@ -59,7 +59,7 @@ exports.getUsers = asyncHandler(async (req, res) => {
     };
 
     const users = await User.find(query)
-        .populate("role", "name")
+        .populate("role", "name status")
         .populate("site", "name location")
         .skip((page - 1) * limit)
         .limit(limit)
@@ -114,22 +114,36 @@ exports.updateUser = asyncHandler(async (req, res) => {
 
 
 // DEACTIVATE USER 
+
 exports.deactivateUser = asyncHandler(async (req, res) => {
 
-    const user = await User.findById(req.params.id);
+    const user = await User.findById(req.params.id).populate("role");
 
     if (!user) {
         res.status(404);
         throw new Error("User not found");
     }
 
-    // toggle status
-    user.status = user.status === "active" ? "inactive" : "active";
+
+    if (user.status === "inactive") {
+
+        const role = await Role.findById(user.role._id);
+
+        if (!role || role.status === "inactive") {
+            res.status(400);
+            throw new Error("Cannot activate user because assigned role is inactive");
+        }
+
+        user.status = "active";
+    }
+    else {
+        user.status = "inactive";
+    }
 
     await user.save();
 
     res.json({
-        message: `User ${user.status === "active" ? "activated" : "deactivated"} successfully`,
-        user
+        message: `User ${user.status}`
     });
 });
+

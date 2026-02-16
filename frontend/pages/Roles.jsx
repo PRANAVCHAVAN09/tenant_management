@@ -32,23 +32,25 @@ const Roles = () => {
     setShowDropdown(false);
   };
 
-  const removePermission = async (permission) => {
-    const updated = editingPermissions.filter(p => p !== permission);
-    setEditingPermissions(updated);
 
-    await updateRole(editingRoleId, { permissions: updated });
-    fetchRoles();
-  };
-  const addPermission = async (permission) => {
+const addPermission = async (role, permission) => {
 
-    const updated = [...editingPermissions, permission];
+  try {
 
-    setEditingPermissions(updated);
+    const updatedPermissions = [...role.permissions, permission];
+
+    await updateRole(role._id, { permissions: updatedPermissions });
+
+    toast.success("Permission added");
+
     setShowDropdown(false);
-
-    await updateRole(editingRoleId, { permissions: updated });
     fetchRoles();
-  };
+
+  } catch (err) {
+    toast.error("Failed to add permission");
+  }
+};
+
 
 
   useEffect(() => {
@@ -167,122 +169,136 @@ const Roles = () => {
         </button>
       </div>
 
-      
+
 
       {/* ROLE LIST */}
       {roles.map(role => {
 
-          const remainingPermissions = permissionsMaster.filter(
-    p => !role.permissions?.includes(p)
-  );
+        const remainingPermissions = permissionsMaster.filter(
+          p => !role.permissions?.includes(p)
+        );
 
-  return (
+        return (
 
-        <div key={role._id} className="bg-white p-4 mb-3 shadow">
+          <div key={role._id} className="bg-white p-4 mb-3 shadow">
 
-          <div className="flex justify-between items-center mb-2">
-            <span className="font-semibold">{role.name}</span>
+            <div className="flex justify-between items-center mb-2">
+              <span className="font-semibold">{role.name}</span>
 
-            <div className="flex gap-3 items-center">
-              <span className={`px-2 py-1 text-xs rounded 
+              <div className="flex gap-3 items-center">
+                <span className={`px-2 py-1 text-xs rounded 
                 ${role.status === "active" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
-                {role.status}
-              </span>
+                  {role.status}
+                </span>
 
-              <button
-                onClick={() => toggleStatus(role)}
-                className="text-blue-500"
-              >
-                {role.status === "active" ? "Deactivate" : "Activate"}
-              </button>
-
-              <button
-                onClick={() => {
-                  if (window.confirm("Are you sure you want to delete this role?")) {
-                    handleDelete(role._id);
-                  }
-                }}
-                className="text-red-500"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-
-
-          <div className="mt-3">
-
-            <div className="flex flex-wrap gap-2 items-center">
-
-              {/* EXISTING PERMISSIONS (Capsules) */}
-              {role.permissions?.map(permission => (
-
-                <div
-                  key={permission}
-                  className="flex items-center bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm"
+                <button
+                  onClick={() => toggleStatus(role)}
+                  className="text-blue-500"
                 >
-                  {permission}
-
-                  <button
-                    onClick={() => {
-                      setEditingRoleId(role._id);
-                      setEditingPermissions(role.permissions);
-                      removePermission(permission);
-                    }}
-                    className="ml-2 text-red-500 font-bold"
-                  >
-                    ×
-                  </button>
-
-                </div>
-
-              ))}
-
-              {/* ADD BUTTON */}
-            {remainingPermissions.length > 0 && (
-              <div className="relative">
+                  {role.status === "active" ? "Deactivate" : "Activate"}
+                </button>
 
                 <button
                   onClick={() => {
-                    startEditingPermissions(role);
-                    setShowDropdown(!showDropdown);
+                    if (window.confirm("Are you sure you want to delete this role?")) {
+                      handleDelete(role._id);
+                    }
                   }}
-                  className="bg-gray-200 px-3 py-1 rounded-full text-sm hover:bg-gray-300"
+                  className="text-red-500"
                 >
-                  + Add
+                  Delete
                 </button>
+              </div>
+            </div>
 
-                {/* DROPDOWN */}
-                {showDropdown && editingRoleId === role._id && (
-                  <div className="absolute mt-2 bg-white border shadow-lg rounded p-2 z-50">
 
-                    {remainingPermissions
-                      .map(permission => (
+            <div className="mt-3">
 
-                        <div
-                          key={permission}
-                          onClick={() => addPermission(permission)}
-                          className="px-3 py-1 hover:bg-gray-100 cursor-pointer text-sm"
-                        >
-                          {permission}
-                        </div>
+              <div className="flex flex-wrap gap-2 items-center">
 
-                      ))}
+                {/* EXISTING PERMISSIONS (Capsules) */}
+                {role.permissions?.map(permission => (
+
+                  <div
+                    key={permission}
+                    className="flex items-center bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm"
+                  >
+                    {permission}
+
+                    <button
+                      onClick={async () => {
+
+                        try {
+
+                          const updatedPermissions = role.permissions.filter(
+                            p => p !== permission
+                          );
+
+                          await updateRole(role._id, { permissions: updatedPermissions });
+
+                          toast.success("Permission removed");
+
+                          fetchRoles();
+
+                        } catch (err) {
+                          toast.error("Failed to remove permission");
+                        }
+
+                      }}
+                      className="ml-2 text-red-500 font-bold"
+                    >
+                      ×
+                    </button>
 
                   </div>
-                )}
 
-              </div>)}
+                ))}
+
+                {/* ADD BUTTON */}
+                {remainingPermissions.length > 0 && (
+                  <div className="relative">
+
+                    <button
+                      onClick={() => {
+                        startEditingPermissions(role);
+                        setShowDropdown(!showDropdown);
+                      }}
+                      className="bg-gray-200 px-3 py-1 rounded-full text-sm hover:bg-gray-300"
+                    >
+                      + Add
+                    </button>
+
+                    {/* DROPDOWN */}
+                    {showDropdown && editingRoleId === role._id && (
+                      <div className="absolute mt-2 bg-white border shadow-lg rounded p-2 z-50">
+
+                        {remainingPermissions
+                          .map(permission => (
+
+                            <div
+                              key={permission}
+                              onClick={() => addPermission(role, permission)}
+                              className="px-3 py-1 hover:bg-gray-100 cursor-pointer text-sm"
+                            >
+                              {permission}
+                            </div>
+
+                          ))}
+
+                      </div>
+                    )}
+
+                  </div>)}
+
+              </div>
 
             </div>
 
+
           </div>
+        )
 
-
-        </div>
-  )
-        
-})}
+      })}
     </div>
   );
 };

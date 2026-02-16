@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import { getUsers, createUser, deactivateUser } from "../services/userService";
 import { getRoles } from "../services/roleService";
 import { getSites } from "../services/siteService";
+import { toast } from "react-toastify";
+
+
 
 const Users = () => {
 
@@ -56,17 +59,17 @@ const Users = () => {
   };
 
   // Deactivate
- const handleDeactivate = async (id) => {
-  try {
-    await deactivateUser(id);
+  const handleDeactivate = async (id) => {
+    try {
+      await deactivateUser(id);
 
-    // refresh list
-    loadUsers();
+      // refresh list
+      loadUsers();
 
-  } catch (err) {
-    alert(err.response?.data?.message);
-  }
-};
+    } catch (err) {
+      alert(err.response?.data?.message);
+    }
+  };
   return (
     <div>
 
@@ -153,7 +156,12 @@ const Users = () => {
 
                 <td className="p-2">{user.name}</td>
                 <td>{user.email}</td>
-                <td>{user.role?.name}</td>
+                <td>
+                  {user.role?.name}
+                  {user.role?.status === "inactive" && (
+                    <span className="ml-2 text-xs text-red-500">(Role Inactive)</span>
+                  )}
+                </td>
                 <td>{user.site?.name}</td>
                 <td>
                   <span className={user.status === "active" ? "text-green-600" : "text-red-500"}>
@@ -170,10 +178,16 @@ const Users = () => {
                     </button>
                   )} */}
                   <button
-                    onClick={() => handleDeactivate(user._id)}
+                    onClick={() => {
+                      if (user.status === "inactive" && user.role?.status === "inactive") {
+                        toast.error("Cannot activate user. Role is inactive.");
+                        return;
+                      }
+                      handleDeactivate(user._id);
+                    }}
                     className={`px-3 py-1 rounded text-white ${user.status === "active"
-                        ? "bg-red-500 hover:bg-red-600"
-                        : "bg-green-500 hover:bg-green-600"
+                      ? "bg-red-500 hover:bg-red-600"
+                      : "bg-green-500 hover:bg-green-600"
                       }`}
                   >
                     {user.status === "active" ? "Deactivate" : "Activate"}
